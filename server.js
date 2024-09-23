@@ -2,8 +2,11 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const connectDB = require('./config/db')
+connectDB(process.env.MONGO_URI)
 
 const testRoute = require('./routes/testRoutes')
+const authRoute = require('./routes/authRoutes')
 
 
 const PORT = process.env.PORT || 8080
@@ -16,6 +19,7 @@ app.use(cors())
 app.use(morgan('dev'))
 
 app.use('/api/v1/test', testRoute)
+app.use('/api/v1/auth', authRoute)
 
 
 app.get('/', (req, res) => {
