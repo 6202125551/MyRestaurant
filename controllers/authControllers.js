@@ -1,4 +1,6 @@
 const User = require('../models/userModel')
+const bcrypt = require('bcryptjs')
+const JWT = require('jsonwebtoken')
 
 const registerController = async(req, res) => {
     try {
@@ -18,7 +20,9 @@ const registerController = async(req, res) => {
             msg : "User already exist"
         })
        }
-       const newUser = await User.create({username,email,password,address,phone})
+       // hashing password
+       const hashedPassword = await bcrypt.hash(password, 10)
+       const newUser = await User.create({username,email,password:hashedPassword,address,phone})
        res.status(201).json({
         status:"success",
         data: newUser
@@ -36,23 +40,41 @@ const registerController = async(req, res) => {
 const loginController = async(req, res) => {
     try {
       const {email, password} = req.body
+      
       if(!email || !password){
         return res.status(500).json({
             status: "failed",
             msg: "Please provide all fields"
         })
       }
-      const user = await User.findOne({email:email, password:password})
+
+      const user = await User.findOne({email:email})
+   
       if(!user){
         return res.status(404).json({
             status: "Failed",
             msg: "User not exist"
         })
       }
+      const isMatch = await bcrypt.compare(password, user.password)
+      
+      if(!isMatch){
+        res.status(200).json({
+            status: "Invalid Credentials",
+            msg: "Please provide correct password"
+          })
+      }
+      let token = JWT.sign({id:user._id},process.env.JWT_SECRET,{
+        expiresIn:'7d'
+      })
       res.status(200).json({
-        status: "successfully logged in",
+        status: "success",
+        msg:" Successfully logged In",
+        token,
         User : user
       })
+      
+    
     } catch (error) {
         res.status(500).json({
             status:"Failed",

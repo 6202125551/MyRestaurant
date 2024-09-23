@@ -7,6 +7,7 @@ connectDB(process.env.MONGO_URI)
 
 const testRoute = require('./routes/testRoutes')
 const authRoute = require('./routes/authRoutes')
+const userRoute = require('./routes/userRoutes')
 
 
 const PORT = process.env.PORT || 8080
@@ -20,6 +21,7 @@ app.use(morgan('dev'))
 
 app.use('/api/v1/test', testRoute)
 app.use('/api/v1/auth', authRoute)
+app.use('/api/v1/user', userRoute)
 
 
 app.get('/', (req, res) => {
